@@ -8,7 +8,7 @@
     <link type="text/css" href="resources/webgl-tutorials.css" rel="stylesheet"/>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c" width="398" height="298"></canvas>
 </body>
 </html>
 <!--
@@ -21,15 +21,23 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
 <script src="resources/webgl-utils.js"></script>
 <script id="vertex-shader-2d" type="notjs">
 
-  // атрибут, который будет получать данные из буфера
   attribute vec4 a_position;
 
-  // все шейдеры имеют функцию main
-  void main() {
+  uniform vec2 u_resolution;
 
-   // gl_Position - специальная переменная вершинного шейдера,
-   // которая отвечает за установку положения
-    gl_Position = a_position;
+  void main() {
+     // convert the position from pixels to 0.0 to 1.0
+     vec2 zeroToOne = a_position.xy / u_resolution;
+
+     // convert from 0->1 to 0->2
+     vec2 zeroToTwo = zeroToOne * 2.0;
+
+     // convert from 0->2 to -1->+1 (clipspace)
+     vec2 clipSpace = zeroToTwo - 1.0;
+
+     //gl_Position = vec4(clipSpace, 0, 1);
+     // перемещаем начало координат в 0,0
+     gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
   }
 
 
@@ -103,7 +111,10 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
         var program = createProgram(gl, vertexShader, fragmentShader);
 
         // look up where the vertex data needs to go.
-        var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+        let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+
+        // look up uniform locations
+        var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
 
         // Create a buffer and put three 2d clip space points in it
         var positionBuffer = gl.createBuffer();
@@ -111,13 +122,13 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
         // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-        var positions = [
-            0, 0,
-            0, 0.5,
-            0.7, 0,
-            0.7, 0,
-            0, -0.5,
-            0, 0,
+        const positions = [
+            10, 20,
+            80, 20,
+            10, 30,
+            10, 30,
+            80, 20,
+            80, 30,
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
@@ -141,6 +152,8 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
 
         // Привязываем буфер положений
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        // установка разрешения
+        gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 
         // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
         // Указываем атрибуту, как получать данные от positionBuffer (ARRAY_BUFFER)
