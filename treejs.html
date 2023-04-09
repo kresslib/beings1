@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Inner Surface of Sphere</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin:0;
+            overflow: hidden;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+<script>
+    // this is where you paste the Three.js code we provided earlier
+    var scene = new THREE.Scene();
+
+    //var camera = new THREE.PerspectiveCamera(1000, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    window.addEventListener('resize', function() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+    });
+    // var cameraWidth = window.innerWidth / 2; // set the width of the camera view
+    // var cameraHeight = window.innerHeight / 2; // set the height of the camera view
+    // var camera = new THREE.OrthographicCamera(-cameraWidth, cameraWidth, cameraHeight, -cameraHeight, 0, 2000);
+
+    //camera.position.set(0, 0, 10); // set the position of the camera
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    var geometry = new THREE.IcosahedronGeometry(1000, 1);
+    geometry.scale(-1, 1, 1); // flip the geometry to the inside
+    const texture = new THREE.TextureLoader().load( "starrysky5.png" );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set( 4, 4 );
+    var material = new THREE.MeshBasicMaterial({
+        map: texture,
+        combine: THREE.MultiplyOperation
+    });
+    material.repeat = true;
+    var mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh); // add sphere to scene
+
+    camera.position.set(0, 0, 0); // move camera inside the sphere
+
+
+    var geometryPlanet = new THREE.IcosahedronGeometry(200, 16);
+    const texturePlanet = new THREE.TextureLoader().load( "8k_earth_daymap.jpeg" );
+    texturePlanet.wrapS = THREE.RepeatWrapping;
+    texturePlanet.wrapT = THREE.RepeatWrapping;
+    texturePlanet.repeat.set( 1, 1 );
+    var materialPlanet = new THREE.MeshBasicMaterial({
+        map: texturePlanet,
+        combine: THREE.MultiplyOperation
+    });
+    //var materialPlanet = new THREE.MeshBasicMaterial({color: 0x00aaff});
+    var meshPlanet = new THREE.Mesh(geometryPlanet, materialPlanet);
+
+    // move the icosahedron close to the camera
+    meshPlanet.position.set(200, -200, -250);
+
+    scene.add(meshPlanet);
+
+    var geometryPlanetA = new THREE.IcosahedronGeometry(205, 16);
+    const texturePlanetA = new THREE.TextureLoader().load( "2k_neptune.jpeg" );
+    texturePlanet.wrapS = THREE.RepeatWrapping;
+    texturePlanet.wrapT = THREE.RepeatWrapping;
+    texturePlanet.repeat.set( 1, 1 );
+    var materialPlanetA = new THREE.MeshBasicMaterial({
+        map: texturePlanetA,
+        combine: THREE.MultiplyOperation,
+        transparent: true,
+        opacity: 0.6
+    });
+    //var materialPlanet = new THREE.MeshBasicMaterial({color: 0x00aaff});
+    var meshPlanetA = new THREE.Mesh(geometryPlanetA, materialPlanetA);
+
+    // move the icosahedron close to the camera
+    meshPlanetA.position.set(200, -200, -250);
+
+    scene.add(meshPlanetA);
+    function animate() {
+        requestAnimationFrame(animate);
+        // rotate the mesh over time
+        meshPlanet.rotation.y += 0.0001;
+        meshPlanetA.rotation.y += 0.000151;
+        meshPlanetA.rotation.x += 0.000051;
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Adjust camera position with arrow keys
+    var arrow = { left: false, up: false, right: false, down: false };
+    document.addEventListener('keydown', (event) => {
+        switch (event.code) {
+            case 'ArrowLeft':
+                arrow.left = true;
+                break;
+            case 'ArrowUp':
+                arrow.up = true;
+                break;
+            case 'ArrowRight':
+                arrow.right = true;
+                break;
+            case 'ArrowDown':
+                arrow.down = true;
+                break;
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        switch (event.code) {
+            case 'ArrowLeft':
+                arrow.left = false;
+                break;
+            case 'ArrowUp':
+                arrow.up = false;
+                break;
+            case 'ArrowRight':
+                arrow.right = false;
+                break;
+            case 'ArrowDown':
+                arrow.down = false;
+                break;
+        }
+    });
+
+    function moveCamera() {
+        // if (arrow.left) camera.position.x -= 0.1;
+        // if (arrow.up) camera.position.y += 0.1;
+        // if (arrow.right) camera.position.x += 0.1;
+        // if (arrow.down) camera.position.y -= 0.1;
+        if (arrow.left) camera.rotation.y += 0.01;
+        if (arrow.up) camera.rotation.x -= 0.01;
+        if (arrow.right) camera.rotation.y -= 0.01;
+        if (arrow.down) camera.rotation.x += 0.01;
+
+    }
+
+    (function render() {
+        requestAnimationFrame(render);
+        moveCamera();
+        renderer.render(scene, camera);
+    })();
+
+
+</script>
+</body>
+</html>
