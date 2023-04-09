@@ -138,10 +138,56 @@
         // if (arrow.up) camera.position.y += 0.1;
         // if (arrow.right) camera.position.x += 0.1;
         // if (arrow.down) camera.position.y -= 0.1;
-        if (arrow.left) camera.rotation.y += 0.01;
-        if (arrow.up) camera.rotation.x -= 0.01;
-        if (arrow.right) camera.rotation.y -= 0.01;
-        if (arrow.down) camera.rotation.x += 0.01;
+        if (arrow.left) {
+            // Rotate the camera in local coordinates
+            var localAxis = new THREE.Vector3(0, 1, 0); // Y-axis
+            var angle = 0.01; // 45 degrees
+            camera.rotateOnAxis(localAxis, angle);
+
+            // Convert the camera rotation to global coordinates
+            var quaternion = new THREE.Quaternion();
+            camera.getWorldQuaternion(quaternion);
+            camera.setRotationFromQuaternion(quaternion);
+
+            //camera.rotation.y += 0.01;
+        }
+        if (arrow.up) {
+            // Rotate the camera in local coordinates
+            var localAxis = new THREE.Vector3(1, 0, 0); // Y-axis
+            var angle = 0.01; // 45 degrees
+            camera.rotateOnAxis(localAxis, angle);
+
+            // Convert the camera rotation to global coordinates
+            var quaternion = new THREE.Quaternion();
+            camera.getWorldQuaternion(quaternion);
+            camera.setRotationFromQuaternion(quaternion);
+            //camera.rotation.x -= 0.01;
+        }
+        if (arrow.right) {
+            // Rotate the camera in local coordinates
+            var localAxis = new THREE.Vector3(0, 1, 0); // Y-axis
+            var angle = -0.01; // 45 degrees
+            camera.rotateOnAxis(localAxis, angle);
+
+            // Convert the camera rotation to global coordinates
+            var quaternion = new THREE.Quaternion();
+            camera.getWorldQuaternion(quaternion);
+            camera.setRotationFromQuaternion(quaternion);
+            //camera.rotation.y -= 0.01;
+        }
+        if (arrow.down) {
+            // Rotate the camera in local coordinates
+            var localAxis = new THREE.Vector3(1, 0, 0); // Y-axis
+            var angle = -0.01; // 45 degrees
+            camera.rotateOnAxis(localAxis, angle);
+
+            // Convert the camera rotation to global coordinates
+            var quaternion = new THREE.Quaternion();
+            camera.getWorldQuaternion(quaternion);
+            camera.setRotationFromQuaternion(quaternion);
+
+            //camera.rotation.x += 0.01;
+        }
 
     }
 
