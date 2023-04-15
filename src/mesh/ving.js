@@ -8,7 +8,7 @@ export function createVing() {
 export function createVingShooting() {
     const arrayMeshLaserRShooting = [];
     for (let i = 0; i < 10; i++) {
-        const laserRShooting = new THREE.CylinderGeometry(0.3, 0.3, 20, 32);
+        const laserRShooting = new THREE.BoxGeometry(0.3, 0.3, 18);
         const materialLaserRShooting = new THREE.MeshBasicMaterial(
             {
                 color: 0xff0000,
@@ -41,8 +41,8 @@ export function moveVingShooting(camera, vingMesh, arrayMeshLaserRShooting) {
         // Получаем направление взгляда первого объекта
         const lookAt = new THREE.Vector3();
         lookAt.setFromMatrixPosition(vingMesh.matrixWorld);
-        lookAt.sub(camera.position);
-        lookAt.normalize();
+        //lookAt.sub(camera.position);
+        //lookAt.normalize();
 
         //
         // // Задаем ось
@@ -56,13 +56,13 @@ export function moveVingShooting(camera, vingMesh, arrayMeshLaserRShooting) {
 
 
         // Размещаем второй объект перед первым объектом с небольшим отступом
-        const offset = new THREE.Vector3(0, 0, -20 - (i * 50));
+        const offset = new THREE.Vector3(0, 0, -20 - (i * 30));
         offset.applyQuaternion(vingMesh.quaternion);
         // Поверните второй объект на 90 градусов по оси z в локальных координатах
-        shooting.rotateX(Math.PI / 2);
+        //shooting.rotateX(Math.PI / 2);
 
         // Переведите повернутый второй объект в мировые координаты с помощью матрицы первого объекта
-        shooting.applyMatrix4(vingMesh.matrixWorld);
+        //shooting.applyMatrix4(vingMesh.matrixWorld);
 
         shooting.position.copy(worldPosition).add(offset);
 

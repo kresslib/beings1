@@ -83,6 +83,7 @@
         meshPlanetA.rotation.x += 0.000051;
 
         meshPVingA.rotation.y += 0.002;
+        meshPVingA.position.set(meshPVingA.position.x+0.01, meshPVingA.position.y+0.01, -250);
         // for (let meshLaserRShooting of arrayMeshLaserRShooting) {
         //     meshLaserRShooting.rotation.x += 0.001;
         // }
@@ -192,7 +193,7 @@
         if (shooting.pVingA) {
             //console.log('arrayMeshLaserRShooting.length: ' + arrayMeshLaserRShooting.length)
             if (!sound.isPlaying) {
-                sound.play();
+                //sound.play();
             }
             moveVingShooting(camera, meshPVingA, arrayMeshLaserRShooting);
             let i = 0;
