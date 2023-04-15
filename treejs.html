@@ -5,21 +5,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body {
-            margin:0;
+            margin: 0;
             overflow: hidden;
             background-color: black;
         }
     </style>
 </head>
 <body>
-<script>
+<script type="module">
+    import { createMeshPlanet, createMeshPlanetA } from './src/mesh/planet.js';
+    import { createMeshSpace } from './src/mesh/space.js';
+    import { createVing, createVingShooting, moveVingShooting } from './src/mesh/ving.js';
+    const shooting = {pVingA: false};
     // this is where you paste the Three.js code we provided earlier
-    var scene = new THREE.Scene();
+    const scene = new THREE.Scene();
 
     //var camera = new THREE.PerspectiveCamera(1000, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const listener = new THREE.AudioListener();
+    camera.add( listener );
 
-    window.addEventListener('resize', function() {
+    // create a global audio source
+    const sound = new THREE.Audio( listener );
+    sound.play();
+    sound.stop();
+    // load a sound and set it as the Audio object's buffer
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load( 'laser2.m4a', function( buffer ) {
+        sound.setBuffer( buffer );
+        sound.setLoop( true );
+        sound.setVolume( 0.5 );
+        //
+    });
+    window.addEventListener('resize', function () {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
     });
@@ -29,62 +47,34 @@
 
     //camera.position.set(0, 0, 10); // set the position of the camera
 
-    var renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    var geometry = new THREE.IcosahedronGeometry(1000, 1);
-    geometry.scale(-1, 1, 1); // flip the geometry to the inside
-    const texture = new THREE.TextureLoader().load( "starrysky5.png" );
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set( 4, 4 );
-    var material = new THREE.MeshBasicMaterial({
-        map: texture,
-        combine: THREE.MultiplyOperation
-    });
-    material.repeat = true;
-    var mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh); // add sphere to scene
+    const meshSpace = createMeshSpace();
+    scene.add(meshSpace); // add sphere to scene
 
     camera.position.set(0, 0, 0); // move camera inside the sphere
 
 
-    var geometryPlanet = new THREE.IcosahedronGeometry(200, 16);
-    const texturePlanet = new THREE.TextureLoader().load( "2023-04-09 05.38.21.jpg" );
-    texturePlanet.wrapS = THREE.RepeatWrapping;
-    texturePlanet.wrapT = THREE.RepeatWrapping;
-    texturePlanet.repeat.set( 1, 1 );
-    var materialPlanet = new THREE.MeshBasicMaterial({
-        map: texturePlanet,
-        combine: THREE.MultiplyOperation
-    });
-    //var materialPlanet = new THREE.MeshBasicMaterial({color: 0x00aaff});
-    var meshPlanet = new THREE.Mesh(geometryPlanet, materialPlanet);
-
-    // move the icosahedron close to the camera
+    const meshPlanet = createMeshPlanet();
     meshPlanet.position.set(200, -200, -250);
-
     scene.add(meshPlanet);
 
-    var geometryPlanetA = new THREE.IcosahedronGeometry(205, 16);
-    const texturePlanetA = new THREE.TextureLoader().load( "2k_neptune.jpeg" );
-    texturePlanet.wrapS = THREE.RepeatWrapping;
-    texturePlanet.wrapT = THREE.RepeatWrapping;
-    texturePlanet.repeat.set( 1, 1 );
-    var materialPlanetA = new THREE.MeshBasicMaterial({
-        map: texturePlanetA,
-        combine: THREE.MultiplyOperation,
-        transparent: true,
-        opacity: 0.6
-    });
-    //var materialPlanet = new THREE.MeshBasicMaterial({color: 0x00aaff});
-    var meshPlanetA = new THREE.Mesh(geometryPlanetA, materialPlanetA);
-
-    // move the icosahedron close to the camera
+    const meshPlanetA = createMeshPlanetA();
     meshPlanetA.position.set(200, -200, -250);
-
     scene.add(meshPlanetA);
+
+    const meshPVingA = createVing();
+    meshPVingA.position.set(-100, 0, -250);
+
+    //meshPVingA.rotation.x = 0.5 * Math.PI;
+    //meshPVingA.rotation.y = 0.5 * Math.PI;
+    //meshPVingA.rotation.z += 0.4;
+    scene.add(meshPVingA);
+    const arrayMeshLaserRShooting = createVingShooting()
+
+
     function animate() {
         requestAnimationFrame(animate);
         // rotate the mesh over time
@@ -92,13 +82,18 @@
         meshPlanetA.rotation.y += 0.000151;
         meshPlanetA.rotation.x += 0.000051;
 
+        meshPVingA.rotation.y += 0.002;
+        // for (let meshLaserRShooting of arrayMeshLaserRShooting) {
+        //     meshLaserRShooting.rotation.x += 0.001;
+        // }
         renderer.render(scene, camera);
     }
 
     animate();
 
     // Adjust camera position with arrow keys
-    var arrow = { left: false, up: false, right: false, down: false };
+    const arrow = {left: false, up: false, right: false, down: false};
+
     document.addEventListener('keydown', (event) => {
         switch (event.code) {
             case 'ArrowLeft':
@@ -112,6 +107,9 @@
                 break;
             case 'ArrowDown':
                 arrow.down = true;
+                break;
+            case 'Space':
+                shooting.pVingA = true;
                 break;
         }
     });
@@ -130,10 +128,13 @@
             case 'ArrowDown':
                 arrow.down = false;
                 break;
+            case 'Space':
+                shooting.pVingA = false;
+                break;
         }
     });
 
-    function moveCamera() {
+    function eventFunc() {
         // if (arrow.left) camera.position.x -= 0.1;
         // if (arrow.up) camera.position.y += 0.1;
         // if (arrow.right) camera.position.x += 0.1;
@@ -185,15 +186,38 @@
             var quaternion = new THREE.Quaternion();
             camera.getWorldQuaternion(quaternion);
             camera.setRotationFromQuaternion(quaternion);
-
+            console.log('arrow.down');
             //camera.rotation.x += 0.01;
+        }
+        if (shooting.pVingA) {
+            //console.log('arrayMeshLaserRShooting.length: ' + arrayMeshLaserRShooting.length)
+            if (!sound.isPlaying) {
+                sound.play();
+            }
+            moveVingShooting(camera, meshPVingA, arrayMeshLaserRShooting);
+            let i = 0;
+            for (let meshLaserRShooting of arrayMeshLaserRShooting) {
+                scene.add(meshLaserRShooting);
+
+                // if (meshLaserRShooting.position.z < -1000) {
+                //     meshLaserRShooting.position.z = -250 - (i * 50)
+                // }
+                // meshLaserRShooting.position.z -= 40;
+                // i++;
+            }
+        } else {
+                sound.stop();
+                let i = 0;
+                for (let meshLaserRShooting of arrayMeshLaserRShooting) {
+                    scene.remove(meshLaserRShooting);
+                }
         }
 
     }
 
     (function render() {
         requestAnimationFrame(render);
-        moveCamera();
+        eventFunc();
         renderer.render(scene, camera);
     })();
 
